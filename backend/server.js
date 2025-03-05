@@ -15,10 +15,16 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .then(() => console.log("MongoDB connected"))
     .catch(err => console.error("MongoDB connection error:", err));
 
+app.get("/members", (req, res) => {
+    res.send("members work");
+    app.use("/members", require("./routes/member.routes"));
+});
+
 app.use("/members", require("./routes/member.routes"));
 app.use("/materials", require("./routes/material.routes"));
 app.use("/inventory", require("./routes/inventory.routes"));
 app.use("/invoices", require("./routes/invoice.routes"));
 
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
