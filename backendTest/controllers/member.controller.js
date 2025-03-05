@@ -1,5 +1,6 @@
 const Member = require("../models/member.model");
 
+// Create new member
 exports.createMember = async (req, res) => {
     try {
         const newMember = new Member(req.body);
@@ -10,6 +11,7 @@ exports.createMember = async (req, res) => {
     }
 };
 
+// Get all members
 exports.getAllMembers = async (req, res) => {
     try {
         const members = await Member.find();
@@ -19,6 +21,7 @@ exports.getAllMembers = async (req, res) => {
     }
 };
 
+// Get member by ID
 exports.getMemberById = async (req, res) => {
     try {
         const member = await Member.findById(req.params.id);
@@ -29,6 +32,7 @@ exports.getMemberById = async (req, res) => {
     }
 };
 
+// Update member by ID
 exports.updateMember = async (req, res) => {
     try {
         const updatedMember = await Member.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -38,6 +42,7 @@ exports.updateMember = async (req, res) => {
     }
 };
 
+// Delete member by ID
 exports.deleteMember = async (req, res) => {
     try {
         await Member.findByIdAndDelete(req.params.id);

@@ -7,24 +7,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Default route
 app.get("/", (req, res) => {
     res.send("Server is running! Use the API endpoints.");
 });
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+// MongoDB connection
+// mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log("MongoDB connected"))
     .catch(err => console.error("MongoDB connection error:", err));
 
-app.get("/members", (req, res) => {
-    res.send("members work");
-    app.use("/members", require("./routes/member.routes"));
-});
-
+// Routes
 app.use("/members", require("./routes/member.routes"));
 app.use("/materials", require("./routes/material.routes"));
 app.use("/inventory", require("./routes/inventory.routes"));
 app.use("/invoices", require("./routes/invoice.routes"));
 
-// const PORT = process.env.PORT || 5000;
+// Set port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
