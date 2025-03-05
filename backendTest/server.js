@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 app.use("/members", require("./routes/member.routes"));
 app.use("/materials", require("./routes/material.routes"));
 app.use("/invoices", require("./routes/invoice.routes"));
-app.use("/inventories", require("./routes/inventory.routes"));
+app.use("/inventory", require("./routes/inventory.routes"));
 
 // Set port
 const PORT = process.env.PORT || 3000;
