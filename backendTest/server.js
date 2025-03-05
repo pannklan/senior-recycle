@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
+const { MongoClient } = require("mongodb");
 
 const app = express();
 app.use(cors());
@@ -13,17 +13,34 @@ app.get("/", (req, res) => {
 });
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("✅ MongoDB connected"))
-    .catch(err => console.error("❌ MongoDB connection error:", err));
+const client = new MongoClient(process.env.MONGO_URI);
+let db;
 
-// Check MongoDB connection status
-const db = mongoose.connection;
-db.on("error", (err) => console.error("❌ MongoDB Connection Error:", err));
-db.once("open", () => console.log("✅ Connected to MongoDB successfully!"));
+async function connectDB() {
+    try {
+        await client.connect();
+        db = client.db(); // Connect to the default DB in the URI
+        console.log("✅ MongoDB connected successfully!");
+    } catch (err) {
+        console.error("❌ MongoDB connection error:", err);
+        process.exit(1);
+    }
+}
+
+connectDB();
+
+// Middleware to attach DB to requests
+app.use((req, res, next) => {
+    if (!db) return res.status(500).json({ error: "Database not initialized" });
+    req.db = db;
+    next();
+});
 
 // Routes
 app.use("/members", require("./routes/member.routes"));
+app.use("/materials", require("./routes/material.routes"));
+app.use("/invoices", require("./routes/invoice.routes"));
+app.use("/inventories", require("./routes/inventory.routes"));
 
 // Set port
 const PORT = process.env.PORT || 3000;
