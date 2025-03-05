@@ -14,9 +14,12 @@ exports.createMember = async (req, res) => {
 // Get all members
 exports.getAllMembers = async (req, res) => {
     try {
+        console.log("Fetching members from database..."); // Debug log
         const members = await Member.find();
+        console.log("Members fetched:", members); // Debug log
         res.json(members);
     } catch (err) {
+        console.error("❌ Error fetching members:", err);
         res.status(500).json({ error: err.message });
     }
 };
