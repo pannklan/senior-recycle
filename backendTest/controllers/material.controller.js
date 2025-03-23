@@ -1,19 +1,13 @@
-const Material = require("../models/material.model");
+const { ObjectId } = require("mongodb");
 
 // Create Material
 exports.createMaterial = async (req, res) => {
     try {
         const { id, name, price, category } = req.body;
+        const newMaterial = { id, name, price, category };
 
-        const newMaterial = new Material({
-            id,
-            name,
-            price,
-            category
-        });
-
-        await newMaterial.save();
-        res.status(201).json(newMaterial);
+        const result = await req.db.collection("materials").insertOne(newMaterial);
+        res.status(201).json({ _id: result.insertedId, ...newMaterial });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -22,56 +16,167 @@ exports.createMaterial = async (req, res) => {
 // Get All Materials
 exports.getAllMaterials = async (req, res) => {
     try {
-        const materials = await Material.find();
+        const materials = await req.db.collection("materials").find().toArray();
         res.json(materials);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Get Material by ID
-exports.getMaterialById = async (req, res) => {
+// Get Material by ObjectId
+exports.getMaterialByObjectId = async (req, res) => {
     try {
-        const material = await Material.findOne({ id: req.params.id });
+        const material = await req.db.collection("materials").findOne({ _id: new ObjectId(req.params.id) });
 
-        if (!material) {
-            return res.status(404).json({ error: "Material not found" });
-        }
-
+        if (!material) return res.status(404).json({ error: "Material not found" });
         res.json(material);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Update Material
-exports.updateMaterial = async (req, res) => {
+// Get Material by id
+exports.getMaterialById = async (req, res) => {
     try {
-        const updatedMaterial = await Material.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
-        );
+        const material = await req.db.collection("materials").findOne({ id: req.params.id });
 
-        if (!updatedMaterial) {
-            return res.status(404).json({ error: "Material not found" });
-        }
-
-        res.json(updatedMaterial);
+        if (!material) return res.status(404).json({ error: "Material not found" });
+        res.json(material);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
 
-// Delete Material
-exports.deleteMaterial = async (req, res) => {
+// Get Materials by name
+exports.getMaterialsByName = async (req, res) => {
     try {
-        const deletedMaterial = await Material.findOneAndDelete({ id: req.params.id });
+        const materials = await req.db.collection("materials").find({ name: req.params.name }).toArray();
 
-        if (!deletedMaterial) {
-            return res.status(404).json({ error: "Material not found" });
-        }
+        if (materials.length === 0) return res.status(404).json({ error: "Materials not found" });
+        res.json(materials);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
+// Get Materials by category
+exports.getMaterialsByCategory = async (req, res) => {
+    try {
+        const materials = await req.db.collection("materials").find({ category: req.params.category }).toArray();
+
+        if (materials.length === 0) return res.status(404).json({ error: "Materials not found" });
+        res.json(materials);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Update Material by ObjectId
+exports.updateMaterialByObjectId = async (req, res) => {
+    try {
+        const updatedMaterial = await req.db.collection("materials").findOneAndUpdate(
+            { _id: new ObjectId(req.params.id) },
+            { $set: req.body },
+            { returnDocument: "after" }
+        );
+
+        if (!updatedMaterial.value) return res.status(404).json({ error: "Material not found" });
+        res.json(updatedMaterial.value);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Update Material by id
+exports.updateMaterialById = async (req, res) => {
+    try {
+        const updatedMaterial = await req.db.collection("materials").findOneAndUpdate(
+            { id: req.params.id },
+            { $set: req.body },
+            { returnDocument: "after" }
+        );
+
+        if (!updatedMaterial.value) return res.status(404).json({ error: "Material not found" });
+        res.json(updatedMaterial.value);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Update Material by name
+exports.updateMaterialByName = async (req, res) => {
+    try {
+        const updatedMaterial = await req.db.collection("materials").findOneAndUpdate(
+            { name: req.params.name },
+            { $set: req.body },
+            { returnDocument: "after" }
+        );
+
+        if (!updatedMaterial.value) return res.status(404).json({ error: "Material not found" });
+        res.json(updatedMaterial.value);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Update Material by category
+exports.updateMaterialByCategory = async (req, res) => {
+    try {
+        const updatedMaterial = await req.db.collection("materials").findOneAndUpdate(
+            { category: req.params.category },
+            { $set: req.body },
+            { returnDocument: "after" }
+        );
+
+        if (!updatedMaterial.value) return res.status(404).json({ error: "Material not found" });
+        res.json(updatedMaterial.value);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Delete Material by ObjectId
+exports.deleteMaterialByObjectId = async (req, res) => {
+    try {
+        const deletedMaterial = await req.db.collection("materials").deleteOne({ _id: new ObjectId(req.params.id) });
+
+        if (deletedMaterial.deletedCount === 0) return res.status(404).json({ error: "Material not found" });
+        res.json({ message: "Material deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Delete Material by id
+exports.deleteMaterialById = async (req, res) => {
+    try {
+        const deletedMaterial = await req.db.collection("materials").deleteOne({ id: req.params.id });
+
+        if (deletedMaterial.deletedCount === 0) return res.status(404).json({ error: "Material not found" });
+        res.json({ message: "Material deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Delete Material by name
+exports.deleteMaterialByName = async (req, res) => {
+    try {
+        const deletedMaterial = await req.db.collection("materials").deleteOne({ name: req.params.name });
+
+        if (deletedMaterial.deletedCount === 0) return res.status(404).json({ error: "Material not found" });
+        res.json({ message: "Material deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Delete Material by category
+exports.deleteMaterialByCategory = async (req, res) => {
+    try {
+        const deletedMaterial = await req.db.collection("materials").deleteOne({ category: req.params.category });
+
+        if (deletedMaterial.deletedCount === 0) return res.status(404).json({ error: "Material not found" });
         res.json({ message: "Material deleted" });
     } catch (err) {
         res.status(500).json({ error: err.message });
