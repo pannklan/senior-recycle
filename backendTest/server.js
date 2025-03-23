@@ -13,8 +13,13 @@ app.get("/", (req, res) => {
 });
 
 // MongoDB connection
-const client = new MongoClient(process.env.MONGO_URI);
-let db;
+const client = new MongoClient(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    tls: true, // Enforce TLS
+    tlsInsecure: false, // Ensure secure connection
+    //tlsAllowInvalidCertificates: true // Ignore SSL certificate issues
+});
 
 async function connectDB() {
     try {
